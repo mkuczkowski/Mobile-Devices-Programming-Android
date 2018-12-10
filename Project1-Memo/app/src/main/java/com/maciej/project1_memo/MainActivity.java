@@ -25,22 +25,22 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-    static final int REQUEST_FIRST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_SECOND_IMAGE_CAPTURE = 2;
-    boolean[] isClicked = {false, false, false, false};
+    boolean[] isClicked = {false, false, false, false, false, false};
     ImageView[] availableThumbnails;
     Bitmap[] takenPhotos;
-
+    static int takenImgsCounter = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        availableThumbnails = new ImageView[4];
-        takenPhotos = new Bitmap[2];
+        availableThumbnails = new ImageView[6];
+        takenPhotos = new Bitmap[3];
         availableThumbnails[0] = findViewById(R.id.thmb1);
         availableThumbnails[1] = findViewById(R.id.thmb2);
         availableThumbnails[2] = findViewById(R.id.thmb3);
         availableThumbnails[3] = findViewById(R.id.thmb4);
+        availableThumbnails[4] = findViewById(R.id.thmb5);
+        availableThumbnails[5] = findViewById(R.id.thmb6);
         shuffleArray(availableThumbnails);
         setupListeners(availableThumbnails);
     }
@@ -55,21 +55,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean isMatch() {
-        if(isClicked[0] && isClicked[1]) {
-            Toast.makeText(MainActivity.this, "Match!", Toast.LENGTH_LONG).show();
-            fadeOutAndHideImage(availableThumbnails[0]);
-            fadeOutAndHideImage(availableThumbnails[1]);
-            isClicked[0] = false;
-            isClicked[1] = false;
-            return true;
-        }
-        if(isClicked[2] && isClicked[3]) {
-            Toast.makeText(MainActivity.this, "Match!", Toast.LENGTH_LONG).show();
-            fadeOutAndHideImage(availableThumbnails[2]);
-            fadeOutAndHideImage(availableThumbnails[3]);
-            isClicked[2] = false;
-            isClicked[3] = false;
-            return true;
+        for(int i = 0; i < 5; i+=2) {
+            if(isClicked[i] && isClicked[i+1]) {
+                Toast.makeText(MainActivity.this, "Match!", Toast.LENGTH_SHORT).show();
+                fadeOutAndHideImage(availableThumbnails[i]);
+                fadeOutAndHideImage(availableThumbnails[i+1]);
+                isClicked[i] = false;
+                isClicked[i+1] = false;
+                return true;
+            }
         }
         return false;
     }
@@ -107,29 +101,25 @@ public class MainActivity extends AppCompatActivity {
             imgView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(takenPhotos[0] == null || takenPhotos[1] == null) {
-                        Toast.makeText(MainActivity.this, "Take photos first!", Toast.LENGTH_LONG).show();
+                    if(takenPhotos[0] == null || takenPhotos[1] == null || takenPhotos[2] == null) {
+                        Toast.makeText(MainActivity.this, "Take photos first!", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (v == availableThumbnails[0]) {
-                        imgView.setImageBitmap(takenPhotos[0]);
-                        isClicked[0] = true;
-                    } else if (v == availableThumbnails[1]) {
-                        imgView.setImageBitmap(takenPhotos[0]);
-                        isClicked[1] = true;
-                    } else if (v == availableThumbnails[2]) {
-                        imgView.setImageBitmap(takenPhotos[1]);
-                        isClicked[2] = true;
-                    } else if (v == availableThumbnails[3]) {
-                        imgView.setImageBitmap(takenPhotos[1]);
-                        isClicked[3] = true;
+                    for(int i = 0, j = 0; i <= 5; i++) {
+                        if(i % 2 == 0 && i != 0) j++;
+                        if (v == availableThumbnails[i]) {
+                            imgView.setImageBitmap(takenPhotos[j]);
+                            isClicked[i] = true;
+                        }
                     }
                     if(!isMatch()) {
                         if(userPickedTwoImgs(isClicked)) {
+                            int i = 0;
                             for (final ImageView img : arr) {
-                                restoreQuestionMarks(img);
+                                if(isClicked[i++])
+                                    restoreQuestionMarks(img);
                             }
-                            Toast.makeText(MainActivity.this, "Try again!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, "Try again!", Toast.LENGTH_SHORT).show();
                             Arrays.fill(isClicked, false);
                         }
                     }
@@ -137,26 +127,18 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-    public void dispatchTakeFirstPictureIntent(View view) {
+    public void dispatchTakePictureIntent(View view) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_FIRST_IMAGE_CAPTURE);
-        }
-    }
-    public void dispatchTakeSecondPictureIntent(View view) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_SECOND_IMAGE_CAPTURE);
+            startActivityForResult(takePictureIntent, ++takenImgsCounter);
         }
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_FIRST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if(resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            takenPhotos[0] = (Bitmap)(extras.get("data"));
-        } else if(requestCode == REQUEST_SECOND_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            takenPhotos[1] = (Bitmap)(extras.get("data"));
+            assert extras != null : "Received data is null";
+            takenPhotos[takenImgsCounter-1] = (Bitmap)(extras.get("data"));
         }
     }
     public void shuffleArray(ImageView[] arr) {
