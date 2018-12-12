@@ -132,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, ++takenImgsCounter);
         }
+        if(takenImgsCounter > 3) takenImgsCounter = 1;
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -141,6 +142,18 @@ public class MainActivity extends AppCompatActivity {
             takenPhotos[takenImgsCounter-1] = (Bitmap)(extras.get("data"));
         }
     }
+
+    public void restartGame(View view) {
+        shuffleArray(availableThumbnails);
+        setupListeners(availableThumbnails);
+        for (final ImageView img : availableThumbnails) {
+            restoreQuestionMarks(img);
+            img.setVisibility(View.VISIBLE);
+        }
+        Arrays.fill(isClicked, false);
+        Toast.makeText(MainActivity.this, "Thumbnails shuffled - game restarted", Toast.LENGTH_SHORT).show();
+    }
+
     public void shuffleArray(ImageView[] arr) {
         Random rand = new Random();
         for (int i = arr.length - 1; i > 0; i--) {
