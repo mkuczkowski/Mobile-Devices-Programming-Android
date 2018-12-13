@@ -1,7 +1,12 @@
 package com.maciej.project1_memo;
 
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -16,6 +21,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -23,18 +31,26 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static android.graphics.BitmapFactory.decodeStream;
+
 public class MainActivity extends AppCompatActivity {
 
     boolean[] isClicked = {false, false, false, false, false, false};
     ImageView[] availableThumbnails;
     Bitmap[] takenPhotos;
+    String[] takenPhotosPaths;
     static int takenImgsCounter = 0;
+    DatabaseHelper myDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        myDb = new DatabaseHelper(this);
         availableThumbnails = new ImageView[6];
         takenPhotos = new Bitmap[3];
+        takenPhotosPaths = new String[3];
+        Cursor data = myDb.getAllData();
         availableThumbnails[0] = findViewById(R.id.thmb1);
         availableThumbnails[1] = findViewById(R.id.thmb2);
         availableThumbnails[2] = findViewById(R.id.thmb3);
@@ -43,6 +59,49 @@ public class MainActivity extends AppCompatActivity {
         availableThumbnails[5] = findViewById(R.id.thmb6);
         shuffleArray(availableThumbnails);
         setupListeners(availableThumbnails);
+        if (data.getCount() != 0) {
+            int i = 0;
+            while (data.moveToNext() && i<3) {
+                takenPhotosPaths[i] = data.getString(1);
+                takenPhotos[i++] = loadImageFromStorage(data.getString(1), data.getString(2));
+            }
+        }
+    }
+
+    private String saveToInternalStorage(Bitmap bitmapImage){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        String fileName = "memo_pic_" + takenImgsCounter + ".jpg";
+        File imgPath = new File(directory, fileName);
+        FileOutputStream outputPath = null;
+        try {
+            outputPath = new FileOutputStream(imgPath);
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, outputPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert outputPath != null;
+                outputPath.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(myDb.insertData(directory.getAbsolutePath(), fileName))
+            Toast.makeText(MainActivity.this, "Image saved", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+        return directory.getAbsolutePath();
+    }
+
+    private Bitmap loadImageFromStorage(String path, String fileName) {
+        try {
+            File fileToLoad = new File(path, fileName);
+            return decodeStream(new FileInputStream(fileToLoad));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public boolean userPickedTwoImgs(boolean[] arr) {
@@ -132,7 +191,10 @@ public class MainActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, ++takenImgsCounter);
         }
-        if(takenImgsCounter > 3) takenImgsCounter = 1;
+        if(takenImgsCounter > 3) {
+            myDb.deleteData();
+            takenImgsCounter = 1;
+        }
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -140,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             assert extras != null : "Received data is null";
             takenPhotos[takenImgsCounter-1] = (Bitmap)(extras.get("data"));
+            takenPhotosPaths[takenImgsCounter-1] = saveToInternalStorage(takenPhotos[takenImgsCounter-1]);
         }
     }
 
