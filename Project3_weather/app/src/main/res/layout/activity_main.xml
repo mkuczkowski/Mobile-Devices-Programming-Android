@@ -10,24 +10,28 @@
         android:id="@+id/temp"
         android:layout_width="135dp"
         android:layout_height="49dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
+        android:textAlignment="center"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/city"
+        app:layout_constraintBottom_toTopOf="@+id/desc"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iconView"
         app:layout_constraintVertical_chainStyle="spread" />
 
     <TextView
         android:id="@+id/city"
-        android:layout_width="95dp"
+        android:layout_width="168dp"
         android:layout_height="38dp"
         android:layout_marginTop="8dp"
-        android:textSize="16sp"
+        android:textAlignment="center"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.513"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/temp" />
+        app:layout_constraintTop_toBottomOf="@+id/hum" />
 
     <EditText
         android:id="@+id/cityInput"
@@ -54,4 +58,45 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/cityInput" />
+
+    <ImageView
+        android:id="@+id/iconView"
+        android:layout_width="173dp"
+        android:layout_height="81dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/temp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="?android:attr/alertDialogIcon" />
+
+    <TextView
+        android:id="@+id/desc"
+        android:layout_width="308dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/hum"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/temp" />
+
+    <TextView
+        android:id="@+id/hum"
+        android:layout_width="254dp"
+        android:layout_height="31dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/city"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/desc" />
 </android.support.constraint.ConstraintLayout>
