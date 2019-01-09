@@ -4,13 +4,11 @@ import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.maciej.project3_weather.data.Temperature;
 import com.maciej.project3_weather.data.Weather;
 import com.maciej.project3_weather.service.WeatherService;
 import com.maciej.project3_weather.service.WeatherServiceCallback;
@@ -22,6 +20,9 @@ public class MainActivity extends AppCompatActivity implements WeatherServiceCal
     private TextView location;
     private TextView description;
     private TextView humidity;
+    private TextView wind;
+    private TextView cloudiness;
+    private TextView pressure;
     private EditText input;
     private String city;
     private ImageView icon;
@@ -40,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements WeatherServiceCal
         icon = findViewById(R.id.iconView);
         description = findViewById(R.id.desc);
         humidity = findViewById(R.id.hum);
+        wind = findViewById(R.id.wind);
+        cloudiness = findViewById(R.id.clouds);
+        pressure = findViewById(R.id.pressure);
 
         service = new WeatherService(this);
         dialog = new ProgressDialog(this);
@@ -51,11 +55,13 @@ public class MainActivity extends AppCompatActivity implements WeatherServiceCal
     @Override
     public void serviceSuccess(Weather weather) {
         dialog.hide();
-        Temperature temp = weather.getTemperature();
-        temperature.setText(temp.getTemperature() + " °C");
+        temperature.setText(weather.getTemperature() + " °C");
         location.setText(weather.getLocation());
         description.setText(weather.getDescription());
         humidity.setText("Humidity: " + weather.getHumidity() + "%");
+        wind.setText("Wind speed: " + weather.getWindSpeed() + " m/s");
+        cloudiness.setText("Cloudiness: " + weather.getClouds() + "%");
+        pressure.setText("Atmospheric pressure: " + weather.getPressure() + " hPa");
         Picasso.get().load("http://openweathermap.org/img/w/" + weather.getIconVal() + ".png").into(icon);
     }
 
