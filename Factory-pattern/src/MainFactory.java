@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class EnemyShipTesting {
+public class MainFactory {
     public static void main(String[] args) {
         EnemyShipFactory shipFactory = new EnemyShipFactory();
         EnemyShip ship = null;
