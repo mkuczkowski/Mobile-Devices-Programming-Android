@@ -7,10 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final String DATABASE_NAME = "history.db";
-    public static final String TABLE_NAME = "history_table";
-    public static final String COL_1 = "ID";
-    public static final String COL_2 = "EXPRESSION";
+    private static final String DATABASE_NAME = "history.db";
+    private static final String TABLE_NAME = "history_table";
+    private static final String COL_1 = "ID";
+    private static final String COL_2 = "EXPRESSION";
 
     public DatabaseHelper (Context context) {
         super(context, DATABASE_NAME, null, 1);
