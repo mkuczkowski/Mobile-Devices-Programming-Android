@@ -14,51 +14,51 @@ import java.net.URLConnection;
 import java.security.InvalidParameterException;
 
 public class WeatherService {
-    private WeatherServiceCallback callback;
-    private Exception error;
+    public static WeatherServiceCallback callback;
+    private static Exception error;
+    private static final String URL = "https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric";
+    private static final String API_KEY = "API_KEY";
 
-    public WeatherService(WeatherServiceCallback callback) {
-        this.callback = callback;
-    }
+    public WeatherService(WeatherServiceCallback callback) { WeatherService.callback = callback; }
 
-    public void refreshWeather(final String location) {
+    public static void refreshWeather(final String location) {
         new AsyncTask<String, Void, String>() {
             @Override
-            protected String doInBackground(String... str) {
-                String endpoint = String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=APIKEY&units=metric", location);
+            protected String doInBackground(String... taskParameters) {
+                String urlAddress = String.format(URL, location, API_KEY);
                 try {
-                    URL url = new URL(endpoint);
+                    URL url = new URL(urlAddress);
                     URLConnection connection = url.openConnection();
                     InputStream inputStream = connection.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                     StringBuilder result = new StringBuilder();
-                    String line;
-                    while((line = reader.readLine()) != null) {
-                        result.append(line);
+                    String currentLine;
+                    while((currentLine = reader.readLine()) != null) {
+                        result.append(currentLine);
                     }
                     return result.toString();
-                } catch (Exception e) {
-                    error = e;
+                } catch (Exception exception) {
+                    error = exception;
                 }
                 return null;
             }
             @Override
-            protected void onPostExecute(String s) {
-                if(s == null && error != null) {
+            protected void onPostExecute(String receivedResult) {
+                if(receivedResult == null && error != null) {
                     callback.serviceFailure(error);
                     return;
                 }
                 try {
-                    JSONObject data = new JSONObject(s);
-                    int codVal = data.optInt("cod");
-                    if(codVal == 404) {
+                    JSONObject jsonData = new JSONObject(receivedResult);
+                    int cityId = jsonData.optInt("cod");
+                    if(cityId == 404) {
                         throw new InvalidParameterException("City not found!");
                     }
                     Weather weather = new Weather();
-                    weather.populate(data);
-                    callback.serviceSuccess(weather);
-                } catch (Exception e) {
-                    error = e;
+                    weather.populate(jsonData);
+                    callback.serviceRespondedSuccessfully(weather);
+                } catch (Exception exception) {
+                    error = exception;
                     callback.serviceFailure(error);
                 }
             }
