@@ -10,7 +10,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int currentPictureCaptured = 0;
+    private int numberOfAssignedPhotos = 0;
     private GameBoard gameBoard;
 
     @Override
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public void dispatchTakePictureIntent(View view) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, currentPictureCaptured);
+            startActivityForResult(takePictureIntent, numberOfAssignedPhotos);
         }
     }
 
@@ -32,15 +32,24 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             if (extras != null) {
-                gameBoard.setCameraPictures((Bitmap)(extras.get("data")), currentPictureCaptured);
-                gameBoard.setCameraPictures((Bitmap)(extras.get("data")), currentPictureCaptured+1);
-                currentPictureCaptured = currentPictureCaptured + 2;
-                if(allImagesAreSet()) {
-                    gameBoard.shuffleThumbnails();
-                    gameBoard.assignPicturesToThumbnails();
-                    currentPictureCaptured = 0;
-                }
+                Bitmap capturedImage = (Bitmap) (extras.get("data"));
+                assignCapturedPictures(capturedImage);
+                checkIfGameCanBeStarted();
             }
+        }
+    }
+
+    private void assignCapturedPictures(Bitmap capturedImage) {
+        gameBoard.setCameraPictures(capturedImage, numberOfAssignedPhotos);
+        gameBoard.setCameraPictures(capturedImage, numberOfAssignedPhotos+1);
+        numberOfAssignedPhotos = numberOfAssignedPhotos + 2;
+    }
+
+    private void checkIfGameCanBeStarted() {
+        if(allImagesAreSet()) {
+            gameBoard.shuffleThumbnails();
+            gameBoard.assignPicturesToThumbnails();
+            numberOfAssignedPhotos = 0;
         }
     }
 

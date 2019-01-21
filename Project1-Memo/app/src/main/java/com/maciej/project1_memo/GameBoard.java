@@ -104,26 +104,33 @@ public class GameBoard implements View.OnClickListener {
         }
     }
 
+    private void toggleImage(MemoThumbnail thumbnailToToggle) {
+        if(thumbnailToToggle.isClicked()) {
+            thumbnailToToggle.restoreQuestionMark();
+            thumbnailToToggle.setClicked(false);
+        } else {
+            thumbnailToToggle.revealImage();
+            thumbnailToToggle.setClicked(true);
+        }
+    }
+
+    private void checkForMatch() {
+        if(!userPickedTwoImages()) return;
+        if(isMatch()) {
+            hideMatchedImages();
+        } else {
+            restoreQuestionMarksToClickedImages();
+        }
+    }
+
     @Override
     public void onClick(View view) {
         ImageView pressedButton = (ImageView) view;
         for (MemoThumbnail thumbnail : thumbnails) {
             if(thumbnail.getThumbnail().equals(pressedButton)) {
-                if(thumbnail.isClicked()) {
-                    thumbnail.restoreQuestionMark();
-                    thumbnail.setClicked(false);
-                } else {
-                    thumbnail.revealImage();
-                    thumbnail.setClicked(true);
-                }
+                toggleImage(thumbnail);
             }
         }
-        if(userPickedTwoImages()) {
-            if(isMatch()) {
-                hideMatchedImages();
-            } else {
-                restoreQuestionMarksToClickedImages();
-            }
-        }
+        checkForMatch();
     }
 }
