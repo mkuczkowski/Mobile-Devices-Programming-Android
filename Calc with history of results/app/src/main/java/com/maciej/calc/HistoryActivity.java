@@ -23,8 +23,7 @@ public class HistoryActivity extends AppCompatActivity {
         if(historyData.getCount() == 0) return null;
         StringBuilder operationsHistory = new StringBuilder();
         while(historyData.moveToNext()) {
-            operationsHistory.append("ID: ").append(historyData.getString(0)).append("\n");
-            operationsHistory.append("Expression: ").append(historyData.getString(1)).append("\n");
+            operationsHistory.append(historyData.getString(1)).append("\n");
         }
         return operationsHistory.toString();
     }

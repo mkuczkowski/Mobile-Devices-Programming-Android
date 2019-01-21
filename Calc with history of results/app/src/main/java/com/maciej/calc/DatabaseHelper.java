@@ -8,31 +8,32 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "history.db";
-    private static final String TABLE_NAME = "history_table";
-    private static final String COL_1 = "ID";
-    private static final String COL_2 = "EXPRESSION";
 
     public DatabaseHelper (Context context) {
         super(context, DATABASE_NAME, null, 1);
-
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + TABLE_NAME + "(" + COL_1 + " INTEGER PRIMARY KEY AUTOINCREMENT," + COL_2 + " TEXT)");
+        db.execSQL(DatabaseContract.HistoryDatabase.SQL_CREATE_ENTRIES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL(DatabaseContract.HistoryDatabase.SQL_DELETE_ENTRIES);
         onCreate(db);
     }
 
-    public boolean insertData(String exp) {
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+
+    public boolean insertData(String expressionToInsert) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_2, exp);
-        long result = db.insert(TABLE_NAME, null, contentValues);
+        contentValues.put(DatabaseContract.HistoryDatabase.COLUMN_1, expressionToInsert);
+        long result = db.insert(DatabaseContract.HistoryDatabase.TABLE_NAME, null, contentValues);
         if(result == -1)
             return false;
         else
@@ -40,11 +41,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     public Cursor getAllData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("select * from " + TABLE_NAME , null);
+        Cursor result = db.rawQuery("select * from " + DatabaseContract.HistoryDatabase.TABLE_NAME , null);
         return result;
     }
     public void deleteData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("delete from " + TABLE_NAME);
+        db.execSQL("delete from " + DatabaseContract.HistoryDatabase.TABLE_NAME);
     }
 }
