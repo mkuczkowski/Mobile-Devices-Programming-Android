@@ -1,7 +1,10 @@
+package com.maciej.factory;
+
 public abstract class EnemyShip {
     private String name;
     private double amountDamage;
     private int weight;
+    private ShipType type;
 
     public String getName() { return name; }
     public void setName(String newName) { name = newName; }
@@ -12,15 +15,13 @@ public abstract class EnemyShip {
     public int getWeight() { return weight; }
     public void setWeight(int newWeight) { weight = newWeight; }
 
-    public void displayEnemyShip() {
-        System.out.println(getName() + " is visible");
-    }
+    public EnemyShip(ShipType type) { this.type = type; }
 
-    public void enemyShipShoots() {
-        System.out.println(getName() + " shoots and does " + getAmountDamage() + " damage");
-    }
+    protected abstract void buildShip();
 
-    public void displayShipWeight() {
-        System.out.println(getName() + " weighs " + getWeight() + " kilograms");
+    @Override
+    public String toString() {
+        return this.getName() + " weighs " + this.getWeight() + " kg and does " +
+                this.getAmountDamage() + " damage";
     }
 }
